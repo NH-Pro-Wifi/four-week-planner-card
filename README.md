@@ -17,7 +17,6 @@ Custom Home Assistant card displaying a responsive overview of multiple days wit
 - [Configuration](#configuration)
   - [Main options](#main-options)
   - [Calendars](#calendars)
-  - [Texts](#texts)
   - [Weather](#weather)
 - [Custom styling using cardmod](#custom-styling-using-cardmod)
 - [Examples](#examples)
@@ -56,7 +55,7 @@ Custom Home Assistant card displaying a responsive overview of multiple days wit
 
 | Name                     | Type             | Default                                            | Supported options                                                                                                                           | Description                                                                            | Version |
 |--------------------------|------------------|----------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|---------|
-| `type`                   | string           | **Required**                                       | `custom:week-planner-card`                                                                                                                  | Type of the card                                                                       | 1.0.0   |
+| `type`                   | string           | **Required**                                       | `custom:four-week-planner-card`                                                                                                                  | Type of the card                                                                       | 1.0.0   |
 | `startingDay`            | string           | `today`                                            | `sunday` \| `monday` \| `tuesday` \| `wednesday` \| `thursday` \| `friday` \| `saturday` \| `month` | Day to start with                                                                      | 1.2.0   |
 | `startingDayOffset`      | number           | 0                                                  | Any integer number                                                                                                                          | Add or subtract days from starting day                                                 | 1.7.0   |
 
