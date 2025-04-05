@@ -23,7 +23,7 @@ jobs:
 
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: dist/week-planner-card.js
-          asset_name: week-planner-card.js
+          file: dist/four-week-planner-card.js
+          asset_name: four-week-planner-card.js
           tag: ${{ github.ref }}
           overwrite: true
