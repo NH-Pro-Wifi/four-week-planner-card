@@ -1,6 +1,5 @@
 name: 'Build & Publish'
-permissions:
-  packages: write
+permissions:  write-all
 
 on:
   release:
