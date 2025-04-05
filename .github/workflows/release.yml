@@ -1,4 +1,6 @@
 name: 'Build & Publish'
+permissions:
+  packages: write
 
 on:
   release:
