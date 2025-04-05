@@ -1,4 +1,4 @@
-# Week Planner Card
+# Four Week Planner Card
 
 ![GitHub Release](https://img.shields.io/github/v/release/NH-Pro-Wifi/four-week-planner-card)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/NH-Pro-Wifi/four-week-planner-card/total)
