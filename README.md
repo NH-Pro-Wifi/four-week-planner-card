@@ -7,6 +7,8 @@
 
 Custom Home Assistant card displaying a responsive overview of multiple days with events from one or multiple calendars
 
+![Example Four Week Planner Cards](examples/example.png)
+
 ## Table of Content
 
 - [Installation](#installation)
