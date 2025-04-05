@@ -1,6 +1,6 @@
 {
   "name": "four-week-planner-card",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Custom Home Assistant card to display events for 4 weeks from one or several calendars.",
   "source": "src/index.js",
   "module": "dist/four-week-planner-card.js",
