@@ -2,24 +2,13 @@ import { css } from 'lit';
 
 export default css`
     ha-card {
-        --legend-spacing: 15px;
-        --legend-dot-size: 10px;
-        --days-columns: 7;
-        --days-spacing: 15px;
-        --day-date-number-font-size: 3.5em;
-        --day-date-number-line-height: 1.2em;
-        --day-date-text-font-size: 1.25em;
-        --events-margin-top: 10px;
-        --event-spacing: 5px;
-        --event-padding: 10px;
-        --event-border-width: 5px;
-        --event-border-radius: 5px;
-        --event-font-size: 1em;
-        --event-line-height: 1.2em;
-        --event-icon-size: 18px;
-        --weather-icon-size: 30px;
-        --weather-temperature-separator: ' / ';
-        --weather-temperature-font-size: 1em;
+        --page-width: 1920px;
+        --page-height: 1080px;
+        --day-per-week: 7;
+        --rows: 36;
+        width: var(--page-width);
+        height: var(--page-height);
+        
     }
 
     ha-card.nobackground {
@@ -28,28 +17,44 @@ export default css`
         box-shadow: none !important;
     }
 
-    ha-card.compact {
-        --days-spacing: 5px;
-        --day-date-number-font-size: 1.5em;
-        --day-date-text-font-size: 1em;
-        --events-margin-top: 5px;
-        --event-spacing: 2px;
-        --event-padding: 2px 5px;
-        --event-border-width: 2px;
-        --event-font-size: .9em;
-        --event-line-height: 1.1em;
-        --weather-icon-size: 20px;
-        --weather-temperature-font-size: 0.8em;
+    .card-content {
+        /* grid-template-columns: repeat(7, 14%);
+        grid-template-rows: repeat(20, 3%); */
+        display: grid;
+        background-color: black;    
+        padding: 0px;
+        grid-template-columns: repeat(var(--day-per-week), calc(var(--page-width) / var(--day-per-week)));
+        grid-template-rows: repeat(var(--rows) , calc(var(--page-height) / var(--rows)));
     }
 
-    .container {
-        container-name: weekplanner;
-        container-type: inline-size;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--days-spacing);
+    .grid-item {
+        position: relative;    
+        text-align: center;
+        margin: 4px;
     }
-  
+
+    .event {
+        background-color: antiquewhite;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .date {
+        background-color: aquamarine;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .today {
+        background-color: red;
+    }   
+
+    .text, .month, .number {
+        margin: 2px;
+    }
+
     .container.hasActions {
       cursor: pointer;
     }
@@ -105,7 +110,6 @@ export default css`
 
     .container .day {
         position: relative;
-        width: calc((100% - (var(--days-columns) - 1) * var(--days-spacing)) / var(--days-columns));
         margin: 0 0 var(--days-spacing) 0;
     }
 
