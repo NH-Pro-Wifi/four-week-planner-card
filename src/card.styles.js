@@ -33,6 +33,16 @@ export default css`
         margin: 4px;
     }
 
+    span.icon {
+        vertical-align: middle;
+        height: 100%;
+        display: inline-block;
+    }
+
+    img.icon {
+        height: 100%;
+    }
+
     .event {
         background-color: antiquewhite;
         display: flex;

@@ -2,8 +2,54 @@ import { html, LitElement } from 'lit';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { DateTime, Settings as LuxonSettings, Info as LuxonInfo } from 'luxon';
 import styles from './card.styles';
+import clear_night from 'data-url:./icons/clear_night.png';
+import cloudy from 'data-url:./icons/cloudy.png';
+import fog from 'data-url:./icons/fog.png';
+import lightning from 'data-url:./icons/lightning.png';
+import storm from 'data-url:./icons/storm.png';
+import storm_night from 'data-url:./icons/storm_night.png';
+import mostly_cloudy from 'data-url:./icons/mostly_cloudy.png';
+import mostly_cloudy_night from 'data-url:./icons/mostly_cloudy_night.png';
+import heavy_rain from 'data-url:./icons/heavy_rain.png';
+import rainy from 'data-url:./icons/rainy.png';
+import snowy from 'data-url:./icons/snowy.png';
+import mixed_rain from 'data-url:./icons/mixed_rain.png';
+import sunny from 'data-url:./icons/sunny.png';
+import windy from 'data-url:./icons/windy.svg';
 
-export class WeekPlannerCard2 extends LitElement {
+const ICONS = {
+  'clear-day': sunny,
+  'clear-night': clear_night,
+  cloudy,
+  overcast: cloudy,
+  fog,
+  hail: mixed_rain,
+  lightning,
+  'lightning-rainy': storm,
+  'partly-cloudy-day': mostly_cloudy,
+  'partly-cloudy-night': mostly_cloudy_night,
+  partlycloudy: mostly_cloudy,
+  pouring: heavy_rain,
+  rain: rainy,
+  rainy,
+  sleet: mixed_rain,
+  snow: snowy,
+  snowy,
+  'snowy-rainy': mixed_rain,
+  sunny,
+  wind: windy,
+  windy,
+  'windy-variant': windy
+};
+
+const ICONS_NIGHT = {
+  ...ICONS,
+  sunny: clear_night,
+  partlycloudy: mostly_cloudy_night,
+  'lightning-rainy': storm_night
+};
+
+export class FourWeekPlannerCard extends LitElement {
     static styles = styles;
 
     _initialized = false;
@@ -27,6 +73,7 @@ export class WeekPlannerCard2 extends LitElement {
     _hardrefresh = false;
     _grid_rows = 0;
     _endDate;
+    _weatherForecast = null;
 
     /**
      * Get config element
@@ -104,6 +151,7 @@ export class WeekPlannerCard2 extends LitElement {
         this._dayFormat = config.dayFormat ?? null;
         this._dateFormat = config.dateFormat ?? 'cccc d LLLL yyyy';
         this._timeFormat = config.timeFormat ?? 'HH:mm';
+        this._weather = this._getWeatherConfig(config.weather);
 
         if (config.locale) {
             LuxonSettings.defaultLocale = config.locale;
@@ -160,10 +208,14 @@ export class WeekPlannerCard2 extends LitElement {
                     let index = daysinrow * k + i
                     if (j == 0) {
                         let date_classes = ['grid-item','date']
-                        if (this._isSameDay(this._calendarMap[index][j], DateTime.now().startOf('day'))){
+                        if (this._isSameDay(this._calendarMap[index][j]['date'], DateTime.now().startOf('day'))){
                             date_classes.unshift('today') 
                         }
-                        itemTemplates.push(html`<div class="${date_classes.join(' ')}"><span class="text">${this._calendarMap[index][j].weekdayLong}</span><span class="month">${this._calendarMap[index][j].monthLong}</span><span class="number">${this._calendarMap[index][j].day}</span></div>`);
+                        let weather = null
+                        if (this._calendarMap[index][j]['weather']) {
+                            weather =  html`<span class="icon"><img class="icon" src="${this._calendarMap[index][j]['weather']['icon']}" alt="${this._calendarMap[index][j]['weather']['condition']}"></span><span class="high"> H: ${this._calendarMap[index][j]['weather']['temperature']}</span>`
+                        }
+                        itemTemplates.push(html`<div class="${date_classes.join(' ')}"><span class="text">${this._calendarMap[index][j]['date'].weekdayLong}</span><span class="month">${this._calendarMap[index][j]['date'].monthLong}</span><span class="number">${this._calendarMap[index][j]['date'].day}</span>${weather}</div>`);
                     } else {
                         let item = this._calendarMap[index][j]
                         if (item == null ) {
@@ -256,10 +308,16 @@ export class WeekPlannerCard2 extends LitElement {
         this._endDate = this._startDate.plus({ days: daysperweek * weeksperview });
 
         for (let i = 0; i < 7 * weeksperview ; i++) {
-            this._calendarMap[i][0] = startDate.plus({days: i});
+            this._calendarMap[i][0] = {
+                'date': startDate.plus({days: i}),
+                'weather': null
+            };
 
         }
 
+        if (this._weather && this._weatherForecast === null) {
+            this._subscribeToWeatherForecast();
+        }
 
         let calendarNumber = 0;
         this._calendars.forEach(calendar => {
@@ -328,7 +386,9 @@ export class WeekPlannerCard2 extends LitElement {
                 clearInterval(checkLoading);
                 this._updateLoader();
                 if (!this._error) {
+                    this._mergeCalenderWeather()
                     this._days = this._calendarMap;
+                    console.log(this._days)
                 }
 
                 window.setTimeout(() => {
@@ -340,6 +400,37 @@ export class WeekPlannerCard2 extends LitElement {
         this._loading--;
     }
 
+    _mergeCalenderWeather(){
+        const weatherState = this._weather ? this.hass.states[this._weather.entity] : null;
+        for (let i = 0; i < this._calendarMap.length; i++) {
+            this._weatherForecast?.forEach((forecast) => {
+                // Only use day time forecasts
+                if (forecast.hasOwnProperty('is_daytime') && forecast.is_daytime === false) {
+                    return;
+                }
+    
+                const dateKey = DateTime.fromISO(forecast.datetime).toISODate();
+                if (dateKey == this._calendarMap[i][0]['date'].toISODate()) { 
+                    this._calendarMap[i][0]['weather'] = {
+                        icon: this._getWeatherIcon(forecast),
+                        condition: this.hass.formatEntityState(weatherState, forecast.condition),
+                        temperature: this.hass.formatEntityAttributeValue(weatherState, 'temperature', forecast.temperature),
+                        templow: this.hass.formatEntityAttributeValue(weatherState, 'templow', forecast.templow)
+                    };
+                }
+            });
+        }
+    }
+
+    _getWeatherIcon(weatherState) {
+        const condition = weatherState?.condition;
+        if (!condition) {
+            return null;
+        }
+
+        const state = condition.toLowerCase();
+        return ICONS[state];
+    }
 
     _pushCalender(title, startDate, endDate){
         let startdaykey = Math.min(this._getDateDiff(this._startDate, startDate), 27)
@@ -534,5 +625,50 @@ export class WeekPlannerCard2 extends LitElement {
             const weekDay = date.weekday;
             return weekDays[weekDay];
         }
+    }
+
+    _subscribeToWeatherForecast() {
+        this._loading++;
+        this._updateLoader();
+        let loadingWeather = true;
+        this.hass.connection.subscribeMessage((event) => {
+            this._weatherForecast = event.forecast ?? [];
+            if (loadingWeather) {
+                this._loading--;
+                loadingWeather = false;
+            }
+        }, {
+            type: 'weather/subscribe_forecast',
+            forecast_type:  'daily',
+            entity_id: this._weather.entity
+        });
+    }
+
+    _getWeatherConfig(weatherConfiguration) {
+        if (
+            !weatherConfiguration
+            || typeof weatherConfiguration !== 'string'
+            && typeof weatherConfiguration !== 'object'
+        ) {
+            return null;
+        }
+
+        let configuration = {
+            entity: null,
+            showCondition: true,
+            showTemperature: false,
+            showLowTemperature: false
+        };
+        if (typeof weatherConfiguration === 'string') {
+            configuration.entity = weatherConfiguration;
+        } else {
+            Object.assign(configuration, weatherConfiguration);
+        }
+
+        if (!configuration.hasOwnProperty('entity') || configuration.entity === null) {
+            return null;
+        }
+
+        return configuration;
     }
 }

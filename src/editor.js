@@ -1,7 +1,7 @@
 import { html, LitElement } from "lit";
 import styles from './editor.styles';
 
-export class WeekPlannerCardEditor2 extends LitElement {
+export class FourWeekPlannerCardEditor extends LitElement {
     static styles = styles;
 
     connectedCallback() {

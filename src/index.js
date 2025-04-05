@@ -1,5 +1,5 @@
-import { WeekPlannerCard2 } from './card';
-import { WeekPlannerCardEditor2 } from "./editor";
+import { FourWeekPlannerCard } from './card';
+import { FourWeekPlannerCardEditor } from "./editor";
 import { version } from '../package.json';
 
 customElements.define(
